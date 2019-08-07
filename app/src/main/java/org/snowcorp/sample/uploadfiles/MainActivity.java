@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -97,10 +98,10 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_CODE:
                 // If the file selection was successful
                 if (resultCode == RESULT_OK) {
-                    if(data.getClipData() != null) {
+                    if (data.getClipData() != null) {
                         int count = data.getClipData().getItemCount();
                         int currentItem = 0;
-                        while(currentItem < count) {
+                        while (currentItem < count) {
                             Uri imageUri = data.getClipData().getItemAt(currentItem).getUri();
                             //do something with the image (save it to some directory or whatever you need to do with it here)
                             currentItem = currentItem + 1;
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.e(TAG, "File select error", e);
                             }
                         }
-                    } else if(data.getData() != null) {
+                    } else if (data.getData() != null) {
                         //do something with the image (save it to some directory or whatever you need to do with it here)
                         final Uri uri = data.getData();
                         Log.i(TAG, "Uri = " + uri.toString());
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private void uploadImagesToServer() {
         if (InternetConnection.checkConnection(MainActivity.this)) {
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://192.168.43.166/~snow/upload-files/")
+                    .baseUrl("http://renata-vision.xyz/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
             // create list of file parts (photo, video, ...)
             List<MultipartBody.Part> parts = new ArrayList<>();
+//            MultipartBody.Part[] parts = new MultipartBody.Part()[];
 
             // create upload service client
             ApiService service = retrofit.create(ApiService.class);
@@ -159,31 +161,34 @@ public class MainActivity extends AppCompatActivity {
             if (arrayList != null) {
                 // create part for file (photo, video, ...)
                 for (int i = 0; i < arrayList.size(); i++) {
-                    parts.add(prepareFilePart("image"+i, arrayList.get(i)));
+                    parts.add(prepareFilePart("image" + i, arrayList.get(i)));
                 }
             }
 
             // create a map of data to pass along
-            RequestBody description = createPartFromString("www.androidlearning.com");
-            RequestBody size = createPartFromString(""+parts.size());
+            RequestBody token = createPartFromString("PFH9vsQnHUaUMwFQhyGoVoQfp5YecBiukyDc3fVE");
+            RequestBody user_id = createPartFromString("PS-VS-I71");
+            RequestBody date = createPartFromString("2019-03-11");
 
             // finally, execute the request
-            Call<ResponseBody> call = service.uploadMultiple(description, size, parts);
+            Call<AddOrcefResponse> call = service.uploadMultiple(user_id, token, date, parts);
 
-            call.enqueue(new Callback<ResponseBody>() {
+            call.enqueue(new Callback<AddOrcefResponse>() {
                 @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                public void onResponse(@NonNull Call<AddOrcefResponse> call, @NonNull Response<AddOrcefResponse> response) {
                     hideProgress();
-                    if(response.isSuccessful()) {
+                    AddOrcefResponse addOrcefResponse = response.body();
+                    if (addOrcefResponse.getStatus().equals("success")) {
+
                         Toast.makeText(MainActivity.this,
-                                "Images successfully uploaded!", Toast.LENGTH_SHORT).show();
+                                " successfully !" + addOrcefResponse.getFileUrl(), Toast.LENGTH_SHORT).show();
                     } else {
-                        Snackbar.make(parentView, R.string.string_some_thing_wrong, Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(parentView, R.string.string_some_thing_wrong + "" + addOrcefResponse.getMessage(), Snackbar.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                public void onFailure(@NonNull Call<AddOrcefResponse> call, @NonNull Throwable t) {
                     hideProgress();
                     Snackbar.make(parentView, t.getMessage(), Snackbar.LENGTH_LONG).show();
                 }
@@ -232,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *  Runtime Permission
+     * Runtime Permission
      */
     private boolean askForPermission() {
         int currentAPIVersion = Build.VERSION.SDK_INT;

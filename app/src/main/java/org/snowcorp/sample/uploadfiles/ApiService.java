@@ -17,10 +17,19 @@ import retrofit2.http.Part;
  */
 
 public interface ApiService {
+//    @Multipart
+//    @POST("upload.php")
+//    Call<ResponseBody> uploadMultiple(
+//                    @Part("description") RequestBody description,
+//                    @Part("size") RequestBody size,
+//                    @Part List<MultipartBody.Part> files);
+
     @Multipart
-    @POST("upload.php")
-    Call<ResponseBody> uploadMultiple(
-            @Part("description") RequestBody description,
-            @Part("size") RequestBody size,
-            @Part List<MultipartBody.Part> files);
+    @POST("rxapi/public/api/v1/orCefFormSubmit")
+    Call<AddOrcefResponse> uploadMultiple(
+            @Part("user_id") RequestBody user_id,
+            @Part("token") RequestBody token,
+            @Part("n_date") RequestBody n_date,
+            @Part List<MultipartBody.Part> file
+    );
 }
