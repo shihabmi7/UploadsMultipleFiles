@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE = 6384;
     private static final int REQUEST_CODE_ASK_PERMISSIONS = 124;
+    private static final String BASE_URL = "your_base_url";
 
     private View parentView;
     private ListView listView;
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     private void uploadImagesToServer() {
         if (InternetConnection.checkConnection(MainActivity.this)) {
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://renata-vision.xyz/")
+                    .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
